@@ -1,0 +1,23 @@
+name: Continuous integration
+
+on: [push]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - id: find-yarn-cache-folder
+        name: Find Yarn's cache folder
+        run: echo "::set-output name=path::$(yarn config get cacheFolder)"
+      - name: Cache Yarn's cache folder
+        uses: actions/cache@v1
+        with:
+          path: ${{ steps.find-yarn-cache-folder.outputs.path }}
+          key: yarn-cache-folder-os-${{ runner.os }}-node-${{ env.node-version }}-${{ hashFiles('yarn.lock') }}
+          restore-keys: |
+            yarn-cache-folder-os-${{ runner.os }}-node-${{ env.node-version }}-
+            yarn-cache-folder-os-${{ runner.os }}-
+      - run: yarn
+      - run: yarn test
+      - run: bash <(curl -s https://codecov.io/bash)
