@@ -24,6 +24,6 @@ jobs:
             yarn-cache-folder-os-${{ runner.os }}-node-${{ env.node-version }}-
             yarn-cache-folder-os-${{ runner.os }}-
       - run: yarn
-      - run: yarn publish
+      - run: yarn npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
