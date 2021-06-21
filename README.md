@@ -3,7 +3,7 @@
 `@applicazza/fastify-nextjs` is a plugin for serving [Next.js](https://nextjs.org) requests
 via [Fastify](https://github.com/fastify/fastify).
 
-[![codecov](https://codecov.io/gh/applicazza/fastify-nextjs/branch/main/graph/badge.svg?token=CCVDPRT9MT)](https://codecov.io/gh/applicazza/fastify-nextjs)
+[![npm](https://img.shields.io/npm/v/@applicazza/fastify-nextjs)](https://www.npmjs.com/package/@applicazza/fastify-nextjs) [![codecov](https://codecov.io/gh/applicazza/fastify-nextjs/branch/main/graph/badge.svg?token=CCVDPRT9MT)](https://codecov.io/gh/applicazza/fastify-nextjs)
 ## Usage
 
 Add dependencies
