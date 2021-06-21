@@ -7,11 +7,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
-        with:
-          node-version: '14.x'
-          registry-url: 'https://registry.npmjs.org'
-          scope: '@applicazza'
       - id: find-yarn-cache-folder
         name: Find Yarn's cache folder
         run: echo "::set-output name=path::$(yarn config get cacheFolder)"
@@ -23,7 +18,13 @@ jobs:
           restore-keys: |
             yarn-cache-folder-os-${{ runner.os }}-node-${{ env.node-version }}-
             yarn-cache-folder-os-${{ runner.os }}-
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14.x'
+          registry-url: 'https://registry.npmjs.org'
+          scope: '@applicazza'
       - run: yarn
+      - run: yarn config set npmAuthToken ${{ secrets.NPM_TOKEN }}
       - run: yarn npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
