@@ -23,8 +23,13 @@ jobs:
           node-version: '14.x'
           registry-url: 'https://registry.npmjs.org'
           scope: '@applicazza'
-      - run: yarn
-      - run: yarn config set npmAuthToken ${{ secrets.NPM_TOKEN }}
-      - run: yarn npm publish
+      - name: Install
+        run: yarn
+      - name: Set npm auth token
+        run: yarn config set npmAuthToken ${{ secrets.NPM_TOKEN }}
+      - name: Build
+        run: yarn build
+      - name: Publish
+        run: yarn npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
