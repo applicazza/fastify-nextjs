@@ -4,6 +4,7 @@
     "name": "Artyom Sokolov",
     "url": "https://artyomsokolov.com"
   },
+  "description": "Fastify and Next.js integration",
   "devDependencies": {
     "@types/eslint": "^7",
     "@types/jest": "^26.0.23",
@@ -29,6 +30,13 @@
   "files": [
     "dist"
   ],
+  "homepage": "https://github.com/applicazza/fastify-nextjs",
+  "keywords": [
+    "fastify",
+    "next",
+    "react",
+    "ssr"
+  ],
   "license": "MIT",
   "main": "dist/index.js",
   "name": "@applicazza/fastify-nextjs",
@@ -44,5 +52,5 @@
     "test": "jest --coverage"
   },
   "types": "dist/index.d.ts",
-  "version": "0.0.2"
+  "version": "0.0.3"
 }
