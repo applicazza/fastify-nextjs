@@ -20,6 +20,14 @@ yarn add @applicazza/fastify-nextjs
 yarn add fastify-static
 ```
 
+Disable compression in Next.js (next.config.js)
+
+```js
+module.exports = {
+  compress: false,
+};
+```
+
 Default example
 
 ```ts
