@@ -9,6 +9,8 @@ declare module 'fastify' {
     // eslint-disable-next-line no-unused-vars
     // noinspection JSUnusedGlobalSymbols
     interface FastifyInstance {
+        nextJsProxyRequestHandler: (request: FastifyRequest, reply: FastifyReply) => void;
+        nextJsRawRequestHandler: (request: FastifyRequest, reply: FastifyReply) => void;
         nextServer: NextServer;
         passNextJsRequests: () => void;
         passNextJsDataRequests: () => void;
@@ -61,11 +63,11 @@ const fastifyNextJs: FastifyPluginAsync<FastifyNextJsOptions> = async (fastify, 
   };
 
   const passNextJsDataRequestsDecorator = () => {
-    fastify.get(`${basePath}/_next/data/*`, nextProxyRequestHandler);
+    fastify.get(`${basePath}/_next/data/*`, nextJsProxyRequestHandler);
   };
 
   const passNextJsDevRequestsDecorator = () => {
-    fastify.all(`${basePath}/_next/*`, nextRawRequestHandler);
+    fastify.all(`${basePath}/_next/*`, nextJsRawRequestHandler);
   };
 
   const passNextJsStaticRequestsDecorator = () => {
@@ -78,11 +80,10 @@ const fastifyNextJs: FastifyPluginAsync<FastifyNextJsOptions> = async (fastify, 
 
   const passNextJsPageRequestsDecorator = () => {
     if (basePath) {
-      fastify.all(`${basePath}`, nextProxyRequestHandler);
+      fastify.all(`${basePath}`, nextJsProxyRequestHandler);
     }
-    fastify.all(`${basePath}/*`, nextProxyRequestHandler);
+    fastify.all(`${basePath}/*`, nextJsProxyRequestHandler);
   };
-
   fastify.decorate('passNextJsRequests', passNextJsRequestsDecorator);
   fastify.decorate('passNextJsDataRequests', passNextJsDataRequestsDecorator);
   fastify.decorate('passNextJsDevRequests', passNextJsDevRequestsDecorator);
@@ -90,13 +91,16 @@ const fastifyNextJs: FastifyPluginAsync<FastifyNextJsOptions> = async (fastify, 
   fastify.decorate('passNextJsPageRequests', passNextJsPageRequestsDecorator);
   fastify.decorate('nextServer', nextServer);
 
-  const nextProxyRequestHandler = function (request: FastifyRequest, reply: FastifyReply) {
+  const nextJsProxyRequestHandler = function (request: FastifyRequest, reply: FastifyReply) {
     nextRequestHandler(proxyFastifyRawRequest(request), proxyFastifyRawReply(reply));
   };
 
-  const nextRawRequestHandler = function (request: FastifyRequest, reply: FastifyReply) {
+  const nextJsRawRequestHandler = function (request: FastifyRequest, reply: FastifyReply) {
     nextRequestHandler(request.raw, reply.raw);
   };
+
+  fastify.decorate('nextJsProxyRequestHandler', nextJsProxyRequestHandler);
+  fastify.decorate('nextJsRawRequestHandler', nextJsRawRequestHandler);
 
   fastify.addHook('onClose', function () {
     return nextServer.close();

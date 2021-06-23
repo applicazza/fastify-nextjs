@@ -13,14 +13,14 @@ Original [fastify-nextjs](https://github.com/fastify/fastify-nextjs) doesn't pas
 
 ## Usage
 
-Add dependencies
+####Add dependencies
 
 ```shell
 yarn add @applicazza/fastify-nextjs
 yarn add fastify-static
 ```
 
-Disable compression in Next.js (next.config.js)
+####Disable compression in Next.js (next.config.js)
 
 ```js
 module.exports = {
@@ -89,6 +89,8 @@ Plugin augments fastify instance with following properties and methods:
 
 ```ts
 interface FastifyInstance {
+    nextJsProxyRequestHandler: (request: FastifyRequest, reply: FastifyReply) => void;
+    nextJsRawRequestHandler: (request: FastifyRequest, reply: FastifyReply) => void;
     nextServer: NextServer;
     passNextJsRequests: () => void;
     passNextJsDataRequests: () => void;
