@@ -66,6 +66,7 @@ fastify.register(fastifyNextJs, {
 await fastify.after();
 
 fastify.passNextJsDataRequests();
+fastify.passNextJsDataRequests();
 if (dev) {
     fastify.passNextJsDevRequests();
 } else {
@@ -93,6 +94,7 @@ interface FastifyInstance {
     nextJsRawRequestHandler: (request: FastifyRequest, reply: FastifyReply) => void;
     nextServer: NextServer;
     passNextJsRequests: () => void;
+    passNextJsImageRequests: () => void;
     passNextJsDataRequests: () => void;
     passNextJsDevRequests: () => void;
     passNextJsPageRequests: () => void;

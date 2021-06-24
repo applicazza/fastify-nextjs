@@ -15,6 +15,7 @@ declare module 'fastify' {
         passNextJsRequests: () => void;
         passNextJsDataRequests: () => void;
         passNextJsDevRequests: () => void;
+        passNextJsImageRequests: () => void;
         passNextJsPageRequests: () => void;
         passNextJsStaticRequests: () => void;
     }
@@ -51,6 +52,7 @@ const fastifyNextJs: FastifyPluginAsync<FastifyNextJsOptions> = async (fastify, 
 
   const passNextJsRequestsDecorator = () => {
     fastify.passNextJsDataRequests();
+    fastify.passNextJsImageRequests();
 
     if (dev) {
       fastify.passNextJsDevRequests();
@@ -63,11 +65,32 @@ const fastifyNextJs: FastifyPluginAsync<FastifyNextJsOptions> = async (fastify, 
   };
 
   const passNextJsDataRequestsDecorator = () => {
-    fastify.get(`${basePath}/_next/data/*`, nextJsProxyRequestHandler);
+    fastify.route({
+      method: ['GET', 'HEAD', 'OPTIONS'],
+      url: `${basePath}/_next/data/*`,
+      handler: nextJsProxyRequestHandler,
+    });
   };
 
   const passNextJsDevRequestsDecorator = () => {
-    fastify.all(`${basePath}/_next/*`, nextJsRawRequestHandler);
+    fastify.route({
+      method: ['GET', 'HEAD', 'OPTIONS'],
+      url: `${basePath}/_next/static/*`,
+      handler: nextJsRawRequestHandler,
+    });
+    fastify.route({
+      method: ['GET', 'HEAD', 'OPTIONS'],
+      url: `${basePath}/_next/webpack-hmr`,
+      handler: nextJsRawRequestHandler,
+    });
+  };
+
+  const passNextJsImageRequestsDecorator = () => {
+    fastify.route({
+      method: ['GET', 'HEAD', 'OPTIONS'],
+      url: `${basePath}/_next/image`,
+      handler: nextJsRawRequestHandler,
+    });
   };
 
   const passNextJsStaticRequestsDecorator = () => {
@@ -80,13 +103,23 @@ const fastifyNextJs: FastifyPluginAsync<FastifyNextJsOptions> = async (fastify, 
 
   const passNextJsPageRequestsDecorator = () => {
     if (basePath) {
-      fastify.all(`${basePath}`, nextJsProxyRequestHandler);
+      fastify.route({
+        method: ['GET', 'HEAD', 'OPTIONS'],
+        url: `${basePath}`,
+        handler: nextJsProxyRequestHandler,
+      });
     }
-    fastify.all(`${basePath}/*`, nextJsProxyRequestHandler);
+
+    fastify.route({
+      method: ['GET', 'HEAD', 'OPTIONS'],
+      url: `${basePath}/*`,
+      handler: nextJsProxyRequestHandler,
+    });
   };
   fastify.decorate('passNextJsRequests', passNextJsRequestsDecorator);
   fastify.decorate('passNextJsDataRequests', passNextJsDataRequestsDecorator);
   fastify.decorate('passNextJsDevRequests', passNextJsDevRequestsDecorator);
+  fastify.decorate('passNextJsImageRequests', passNextJsImageRequestsDecorator);
   fastify.decorate('passNextJsStaticRequests', passNextJsStaticRequestsDecorator);
   fastify.decorate('passNextJsPageRequests', passNextJsPageRequestsDecorator);
   fastify.decorate('nextServer', nextServer);
