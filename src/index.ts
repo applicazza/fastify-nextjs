@@ -48,7 +48,13 @@ const fastifyNextJs: FastifyPluginAsync<FastifyNextJsOptions> = async (fastify, 
     dev,
   });
 
-  const nextRequestHandler = nextServer.getRequestHandler();
+  const nextJsProxyRequestHandler = function (request: FastifyRequest, reply: FastifyReply) {
+    nextServer.getRequestHandler()(proxyFastifyRawRequest(request), proxyFastifyRawReply(reply));
+  };
+
+  const nextJsRawRequestHandler = function (request: FastifyRequest, reply: FastifyReply) {
+    nextServer.getRequestHandler()(request.raw, reply.raw);
+  };
 
   const passNextJsRequestsDecorator = () => {
     fastify.passNextJsDataRequests();
@@ -61,85 +67,89 @@ const fastifyNextJs: FastifyPluginAsync<FastifyNextJsOptions> = async (fastify, 
     }
 
     fastify.passNextJsPageRequests();
-
   };
 
   const passNextJsDataRequestsDecorator = () => {
-    fastify.route({
-      method: ['GET', 'HEAD', 'OPTIONS'],
-      url: `${basePath}/_next/data/*`,
-      handler: nextJsProxyRequestHandler,
+    fastify.register((fastify, _, done) => {
+      fastify.route({
+        method: ['GET', 'HEAD', 'OPTIONS'],
+        url: '/data/*',
+        handler: nextJsProxyRequestHandler
+      });
+      done();
+    }, {
+      prefix: `${basePath}/_next`
     });
   };
 
   const passNextJsDevRequestsDecorator = () => {
-    fastify.route({
-      method: ['GET', 'HEAD', 'OPTIONS'],
-      url: `${basePath}/_next/static/*`,
-      handler: nextJsRawRequestHandler,
-    });
-    fastify.route({
-      method: ['GET', 'HEAD', 'OPTIONS'],
-      url: `${basePath}/_next/webpack-hmr`,
-      handler: nextJsRawRequestHandler,
+    fastify.register((fastify, _, done) => {
+      fastify.route({
+        method: ['GET', 'HEAD', 'OPTIONS'],
+        url: '/static/*',
+        handler: nextJsRawRequestHandler
+      });
+      fastify.route({
+        method: ['GET', 'HEAD', 'OPTIONS'],
+        url: '/webpack-hmr',
+        handler: nextJsRawRequestHandler
+      });
+      done();
+    }, {
+      prefix: `${basePath}/_next`
     });
   };
 
   const passNextJsImageRequestsDecorator = () => {
-    fastify.route({
-      method: ['GET', 'HEAD', 'OPTIONS'],
-      url: `${basePath}/_next/image`,
-      handler: nextJsRawRequestHandler,
+    fastify.register((fastify, _, done) => {
+      fastify.route({
+        method: ['GET', 'HEAD', 'OPTIONS'],
+        url: '/image',
+        handler: nextJsRawRequestHandler
+      });
+      done();
+    }, {
+      prefix: `${basePath}/_next`
     });
   };
 
   const passNextJsStaticRequestsDecorator = () => {
     fastify.register(fastifyStatic, {
-      prefix: '${basePath}/_next/static/',
+      prefix: `${basePath}/_next/static/`,
       root: `${process.cwd()}/.next/static`,
       decorateReply: false,
     });
   };
 
-  const passNextJsPageRequestsDecorator = () => {
-    if (basePath) {
+  const passNextJsPageRequestsDecorator = function () {
+    fastify.register((fastify, _, done) => {
       fastify.route({
         method: ['GET', 'HEAD', 'OPTIONS'],
-        url: `${basePath}`,
+        url: '*',
         handler: nextJsProxyRequestHandler,
       });
-    }
 
-    fastify.route({
-      method: ['GET', 'HEAD', 'OPTIONS'],
-      url: `${basePath}/*`,
-      handler: nextJsProxyRequestHandler,
+      done();
+    }, {
+      prefix: basePath || '/'
     });
-  };
-  fastify.decorate('passNextJsRequests', passNextJsRequestsDecorator);
-  fastify.decorate('passNextJsDataRequests', passNextJsDataRequestsDecorator);
-  fastify.decorate('passNextJsDevRequests', passNextJsDevRequestsDecorator);
-  fastify.decorate('passNextJsImageRequests', passNextJsImageRequestsDecorator);
-  fastify.decorate('passNextJsStaticRequests', passNextJsStaticRequestsDecorator);
-  fastify.decorate('passNextJsPageRequests', passNextJsPageRequestsDecorator);
-  fastify.decorate('nextServer', nextServer);
-
-  const nextJsProxyRequestHandler = function (request: FastifyRequest, reply: FastifyReply) {
-    nextRequestHandler(proxyFastifyRawRequest(request), proxyFastifyRawReply(reply));
-  };
-
-  const nextJsRawRequestHandler = function (request: FastifyRequest, reply: FastifyReply) {
-    nextRequestHandler(request.raw, reply.raw);
   };
 
   fastify.decorate('nextJsProxyRequestHandler', nextJsProxyRequestHandler);
   fastify.decorate('nextJsRawRequestHandler', nextJsRawRequestHandler);
+  fastify.decorate('nextServer', nextServer);
+  fastify.decorate('passNextJsDataRequests', passNextJsDataRequestsDecorator);
+  fastify.decorate('passNextJsDevRequests', passNextJsDevRequestsDecorator);
+  fastify.decorate('passNextJsImageRequests', passNextJsImageRequestsDecorator);
+  fastify.decorate('passNextJsPageRequests', passNextJsPageRequestsDecorator);
+  fastify.decorate('passNextJsRequests', passNextJsRequestsDecorator);
+  fastify.decorate('passNextJsStaticRequests', passNextJsStaticRequestsDecorator);
+
+  await nextServer.prepare();
 
   fastify.addHook('onClose', function () {
     return nextServer.close();
   });
-
-  await nextServer.prepare();
 };
 
 const proxyFastifyRawRequest = (request: FastifyRequest) => {
@@ -205,4 +215,5 @@ const proxyFastifyRawReply = (reply: FastifyReply) => {
 
 export default fastifyPlugin(fastifyNextJs, {
   fastify: '3.x',
+  name: '@applicazza/fastify-nextjs'
 });

@@ -18,7 +18,7 @@ __metadata:
     "@typescript-eslint/parser": ^4.27.0
     axios: ^0.21.1
     esbuild: ^0.12.9
-    esbuild-node-externals: ^1.2.0
+    esbuild-node-externals: ^1.3.0
     eslint: ^7.29.0
     fastify: ^3.18.0
     fastify-plugin: ^3.0.0
@@ -2573,15 +2573,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"esbuild-node-externals@npm:^1.2.0":
-  version: 1.2.0
-  resolution: "esbuild-node-externals@npm:1.2.0"
+"esbuild-node-externals@npm:^1.3.0":
+  version: 1.3.0
+  resolution: "esbuild-node-externals@npm:1.3.0"
   dependencies:
     find-up: 5.0.0
     tslib: 2.1.0
   peerDependencies:
-    esbuild: ^0.11.0
-  checksum: c5c6681b83d13486ae5f469f7cae5de9252ab26912002223958f2eed2641a6b20ff3c8a3dbc1bff27c271489004e66f4529eaa08e3e29c429b901fea0d610aa5
+    esbuild: ^0.12.0
+  checksum: 03a10a2807906c243c38935f758b3db47e4b2257d58101bdd6f027425edc9b522820f602f27a1fec89e6b2aa3672eb44cbf04b3be4bdcc10346e383b00a901d3
   languageName: node
   linkType: hard
 
