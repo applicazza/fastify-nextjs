@@ -66,7 +66,7 @@ fastify.register(fastifyNextJs, {
 await fastify.after();
 
 fastify.passNextJsDataRequests();
-fastify.passNextJsDataRequests();
+fastify.passNextJsImageRequests();
 if (dev) {
     fastify.passNextJsDevRequests();
 } else {
