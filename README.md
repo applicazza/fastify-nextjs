@@ -13,14 +13,14 @@ Original [fastify-nextjs](https://github.com/fastify/fastify-nextjs) doesn't pas
 
 ## Usage
 
-####Add dependencies
+###Add dependencies
 
 ```shell
 yarn add @applicazza/fastify-nextjs
 yarn add fastify-static
 ```
 
-####Disable compression in Next.js (next.config.js)
+###Disable compression in Next.js (next.config.js)
 
 ```js
 module.exports = {
@@ -28,7 +28,7 @@ module.exports = {
 };
 ```
 
-Default example
+###Default example
 
 ```ts
 import createFastify from 'fastify';
@@ -49,7 +49,7 @@ fastify.passNextJsRequests();
 await fastify.listen(0);
 ```
 
-Extended example
+###Extended example
 
 ```ts
 import createFastify from 'fastify';
@@ -77,7 +77,7 @@ fastify.passNextJsPageRequests();
 await fastify.listen(0);
 ```
 
-Plugin accepts following options:
+###Plugin accepts following options:
 
 ```ts
 interface FastifyNextJsOptions {
@@ -86,19 +86,23 @@ interface FastifyNextJsOptions {
 }
 ```
 
-Plugin augments fastify instance with following properties and methods:
+###Plugin augments fastify instance with following properties and methods:
 
 ```ts
+interface FastifyNextJsDecoratorArguments {
+  logLevel?: LogLevel;
+}
+
 interface FastifyInstance {
     nextJsProxyRequestHandler: (request: FastifyRequest, reply: FastifyReply) => void;
     nextJsRawRequestHandler: (request: FastifyRequest, reply: FastifyReply) => void;
     nextServer: NextServer;
-    passNextJsRequests: () => void;
-    passNextJsImageRequests: () => void;
-    passNextJsDataRequests: () => void;
-    passNextJsDevRequests: () => void;
-    passNextJsPageRequests: () => void;
-    passNextJsStaticRequests: () => void;
+    passNextJsRequests: (args?: FastifyNextJsDecoratorArguments) => void;
+    passNextJsDataRequests: (args?: FastifyNextJsDecoratorArguments) => void;
+    passNextJsDevRequests: (args?: FastifyNextJsDecoratorArguments) => void;
+    passNextJsImageRequests: (args?: FastifyNextJsDecoratorArguments) => void;
+    passNextJsPageRequests: (args?: FastifyNextJsDecoratorArguments) => void;
+    passNextJsStaticRequests: (args?: FastifyNextJsDecoratorArguments) => void;
 }
 ```
 

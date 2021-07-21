@@ -4,39 +4,44 @@ import { IncomingMessage, ServerResponse } from 'http';
 import Next from 'next';
 import { NextServer } from 'next/dist/server/next';
 import fastifyStatic from 'fastify-static';
+import { LogLevel } from 'fastify/types/logger';
+
+export interface FastifyNextJsDecoratorArguments {
+  logLevel?: LogLevel;
+}
 
 declare module 'fastify' {
-    // eslint-disable-next-line no-unused-vars
-    // noinspection JSUnusedGlobalSymbols
-    interface FastifyInstance {
-        nextJsProxyRequestHandler: (request: FastifyRequest, reply: FastifyReply) => void;
-        nextJsRawRequestHandler: (request: FastifyRequest, reply: FastifyReply) => void;
-        nextServer: NextServer;
-        passNextJsRequests: () => void;
-        passNextJsDataRequests: () => void;
-        passNextJsDevRequests: () => void;
-        passNextJsImageRequests: () => void;
-        passNextJsPageRequests: () => void;
-        passNextJsStaticRequests: () => void;
-    }
+  // eslint-disable-next-line no-unused-vars
+  // noinspection JSUnusedGlobalSymbols
+  interface FastifyInstance {
+    nextJsProxyRequestHandler: (request: FastifyRequest, reply: FastifyReply) => void;
+    nextJsRawRequestHandler: (request: FastifyRequest, reply: FastifyReply) => void;
+    nextServer: NextServer;
+    passNextJsRequests: (args?: FastifyNextJsDecoratorArguments) => void;
+    passNextJsDataRequests: (args?: FastifyNextJsDecoratorArguments) => void;
+    passNextJsDevRequests: (args?: FastifyNextJsDecoratorArguments) => void;
+    passNextJsImageRequests: (args?: FastifyNextJsDecoratorArguments) => void;
+    passNextJsPageRequests: (args?: FastifyNextJsDecoratorArguments) => void;
+    passNextJsStaticRequests: (args?: FastifyNextJsDecoratorArguments) => void;
+  }
 }
 
 declare module 'http' {
 
-    // eslint-disable-next-line no-unused-vars
-    interface IncomingMessage {
-        fastify: FastifyRequest;
-    }
+  // eslint-disable-next-line no-unused-vars
+  interface IncomingMessage {
+    fastify: FastifyRequest;
+  }
 
-    // eslint-disable-next-line no-unused-vars
-    interface OutgoingMessage {
-        fastify: FastifyReply;
-    }
+  // eslint-disable-next-line no-unused-vars
+  interface OutgoingMessage {
+    fastify: FastifyReply;
+  }
 }
 
 export interface FastifyNextJsOptions {
-    dev?: boolean;
-    basePath?: string;
+  dev?: boolean;
+  basePath?: string;
 }
 
 const fastifyNextJs: FastifyPluginAsync<FastifyNextJsOptions> = async (fastify, { dev, basePath = '' }) => {
@@ -56,20 +61,20 @@ const fastifyNextJs: FastifyPluginAsync<FastifyNextJsOptions> = async (fastify, 
     nextServer.getRequestHandler()(request.raw, reply.raw);
   };
 
-  const passNextJsRequestsDecorator = () => {
-    fastify.passNextJsDataRequests();
-    fastify.passNextJsImageRequests();
+  const passNextJsRequestsDecorator = (args?: FastifyNextJsDecoratorArguments) => {
+    fastify.passNextJsDataRequests(args);
+    fastify.passNextJsImageRequests(args);
 
     if (dev) {
-      fastify.passNextJsDevRequests();
+      fastify.passNextJsDevRequests(args);
     } else {
-      fastify.passNextJsStaticRequests();
+      fastify.passNextJsStaticRequests(args);
     }
 
-    fastify.passNextJsPageRequests();
+    fastify.passNextJsPageRequests(args);
   };
 
-  const passNextJsDataRequestsDecorator = () => {
+  const passNextJsDataRequestsDecorator = ({ logLevel }: FastifyNextJsDecoratorArguments = {}) => {
     fastify.register((fastify, _, done) => {
       fastify.route({
         method: ['GET', 'HEAD', 'OPTIONS'],
@@ -78,11 +83,12 @@ const fastifyNextJs: FastifyPluginAsync<FastifyNextJsOptions> = async (fastify, 
       });
       done();
     }, {
+      logLevel,
       prefix: `${basePath}/_next`
     });
   };
 
-  const passNextJsDevRequestsDecorator = () => {
+  const passNextJsDevRequestsDecorator = ({ logLevel }: FastifyNextJsDecoratorArguments = {}) => {
     fastify.register((fastify, _, done) => {
       fastify.route({
         method: ['GET', 'HEAD', 'OPTIONS'],
@@ -96,11 +102,12 @@ const fastifyNextJs: FastifyPluginAsync<FastifyNextJsOptions> = async (fastify, 
       });
       done();
     }, {
+      logLevel,
       prefix: `${basePath}/_next`
     });
   };
 
-  const passNextJsImageRequestsDecorator = () => {
+  const passNextJsImageRequestsDecorator = ({ logLevel }: FastifyNextJsDecoratorArguments = {}) => {
     fastify.register((fastify, _, done) => {
       fastify.route({
         method: ['GET', 'HEAD', 'OPTIONS'],
@@ -109,19 +116,21 @@ const fastifyNextJs: FastifyPluginAsync<FastifyNextJsOptions> = async (fastify, 
       });
       done();
     }, {
+      logLevel,
       prefix: `${basePath}/_next`
     });
   };
 
-  const passNextJsStaticRequestsDecorator = () => {
+  const passNextJsStaticRequestsDecorator = ({ logLevel }: FastifyNextJsDecoratorArguments = {}) => {
     fastify.register(fastifyStatic, {
+      logLevel,
       prefix: `${basePath}/_next/static/`,
       root: `${process.cwd()}/.next/static`,
       decorateReply: false,
     });
   };
 
-  const passNextJsPageRequestsDecorator = function () {
+  const passNextJsPageRequestsDecorator = ({ logLevel }: FastifyNextJsDecoratorArguments = {}) => {
     fastify.register((fastify, _, done) => {
       fastify.route({
         method: ['GET', 'HEAD', 'OPTIONS'],
@@ -131,6 +140,7 @@ const fastifyNextJs: FastifyPluginAsync<FastifyNextJsOptions> = async (fastify, 
 
       done();
     }, {
+      logLevel,
       prefix: basePath || '/'
     });
   };
