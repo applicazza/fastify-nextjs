@@ -41,16 +41,18 @@ declare module 'http' {
 
 export interface FastifyNextJsOptions {
   dev?: boolean;
+  dir?: string;
   basePath?: string;
 }
 
-const fastifyNextJs: FastifyPluginAsync<FastifyNextJsOptions> = async (fastify, { dev, basePath = '' }) => {
+const fastifyNextJs: FastifyPluginAsync<FastifyNextJsOptions> = async (fastify, { dev, dir, basePath = '' }) => {
   if (dev === undefined) {
     dev = process.env.NODE_ENV !== 'production';
   }
 
   const nextServer = Next({
     dev,
+    dir,
   });
 
   const nextJsProxyRequestHandler = function (request: FastifyRequest, reply: FastifyReply) {

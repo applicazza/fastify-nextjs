@@ -81,8 +81,9 @@ await fastify.listen(0);
 
 ```ts
 interface FastifyNextJsOptions {
-    dev?: boolean;
     basePath?: string;
+    dev?: boolean;
+    dir?: string;
 }
 ```
 
